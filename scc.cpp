@@ -15,21 +15,26 @@ const ll mod=998244353;
 
   // ONCE A NOOB ALWAYS A NOOB
 
-    class SCC {
+  class SCC {
         
         public:
 
          vector<vector<ll>>adj,Revadj,scc;
-         vector<ll>vis,order;
+         vector<ll>vis,order , belongsTo , rootNodes, RepresentComp;
+         vector<vector<ll>>Condensed_Scc;
          ll n,cnt;
 
-          SCC (ll n,vector<ll> adj[]) {
+          SCC (ll n,vector<ll> adj[] ) {
              
-              this->n=n;
-              this->cnt=0;
-              (this->adj).resize(n);
-              (this->Revadj).resize(n);
-              this->vis.assign(n,0);
+              this->n = n;
+              this->cnt = 0;
+              this->adj.resize(n) ;
+              Revadj.resize(n);
+              vis.assign(n,0);
+              belongsTo.assign(n , 0);
+              RepresentComp.assign(n , 0);
+
+
               for(ll i=0;i<n;i++){
                        for(auto it:adj[i]){
                              this->adj[i].push_back(it);
@@ -53,6 +58,8 @@ const ll mod=998244353;
            void dfs2(ll node,vector<ll>&v){
 
                      vis[node]=1;
+                     belongsTo[node] = cnt ;
+
                      for(auto it:Revadj[node]){
                               if(!vis[it]){
                                     dfs2(it,v);
@@ -74,23 +81,31 @@ const ll mod=998244353;
                 
                  make_order();
                  vis.assign(n,0);
+                cout << endl;
                while(!order.empty()){
                     
                     ll node=order.back();
                     order.pop_back();
                     if(vis[node]) continue;
-                    cnt++;
                     vector<ll>temp;
                     dfs2(node,temp);
-                    scc.push_back(temp);
+                    rootNodes.push_back(node) ;
+                    cnt++;
+                   scc.push_back(temp);
+                   RepresentComp[cnt - 1] = node ;
                }    
-
+                 Condensed_Scc.resize(cnt);
+                 for(ll i = 0 ; i < n ;i ++){
+                       for(auto j : adj[i]){
+                            if(belongsTo[i] != belongsTo[j]){
+                               Condensed_Scc[belongsTo[i]].push_back(belongsTo[j]);
+                            }
+                       }
+                 }
            }
 
-           vector<vector<ll>>get_scc(){
-                 return scc;
-           }
-    };
+   };  
+
   
  
      void solve(){
@@ -110,7 +125,7 @@ const ll mod=998244353;
             SCC *scc=new SCC(n,adj);
             
             scc->store_scc();
-            vector<vector<ll>>v=scc->get_scc();
+            vector<vector<ll>>v=scc->scc;
           
             ll cnt=0;
             
